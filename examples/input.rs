@@ -24,7 +24,7 @@ impl Model for InputModel {
                 KeyCode::Enter => {
                     self.name = Some(self.input.buffer());
                     self.input.clear();
-                    // return Some(quit_cmd);
+                    // return Some(Box::new(|| command::quit()));
                     return None;
                 }
                 _ => self.input.on_key_event(*key_event),
@@ -36,12 +36,35 @@ impl Model for InputModel {
 
     fn view(&self) -> String {
         let prompt = "Enter your name: ";
+        let input_buffer = self.input.buffer();
+        let cursor_position = self.input.pos();
+
+        // Adjust the view to ensure both sides of the bar are visible when moving left/right.
+        let (visible_before, visible_after) = if cursor_position == 0 {
+            (String::new(), input_buffer.clone())
+        } else if cursor_position < input_buffer.len() {
+            (
+                input_buffer[..cursor_position].to_string(),
+                input_buffer[cursor_position..].to_string(),
+            )
+        } else {
+            (input_buffer.clone(), String::new())
+        };
+
+        // Insert a dynamic vertical bar at the cursor position,
+        // this must include the rightmost position.
         let output = format!(
-            "{}{}\n{}^",
+            "{}{}{}{}",
             prompt,
-            self.input.buffer(),
-            " ".repeat(prompt.len() + self.input.pos())
+            visible_before,
+            if cursor_position <= input_buffer.len() {
+                "|"
+            } else {
+                ""
+            },
+            visible_after,
         );
+
         if let Some(name) = &self.name {
             format!("{}\nHello, {}!", output, name)
         } else {

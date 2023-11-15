@@ -8,7 +8,7 @@ use locket::{
 fn main() {
     let model = InputModel {
         prompt: "What is your name?".to_string(),
-        input: TextInput::new(),
+        input: TextInput::new(29),
         name: None,
     };
 
@@ -44,7 +44,7 @@ impl Model for InputModel {
                     return None;
                 }
                 // Pass any other keystrokes through to the input component.
-                _ => self.input.on_key_event(*key_event),
+                _ => self.input.handle_key(*key_event),
             }
         };
 

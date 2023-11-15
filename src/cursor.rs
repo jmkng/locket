@@ -1,24 +1,3 @@
-/// Execute a block expression and immediately flush stdout.
-#[macro_export]
-macro_rules! flush {
-    ($block:expr) => {{
-        let result = $block;
-
-        if let Err(error) = std::io::stdout().flush() {
-            Err(error)
-        } else {
-            Ok(result)
-        }
-    }};
-    () => {
-        if let Err(error) = std::io::stdout().flush() {
-            Err(error)
-        } else {
-            Ok(())
-        }
-    };
-}
-
 /// Move the cursor.
 ///
 /// You may prefer one of the "move_*" macros instead.

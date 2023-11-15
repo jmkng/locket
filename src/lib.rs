@@ -12,9 +12,9 @@ mod foreign;
 mod model;
 mod screen;
 
-/// Enables mouse capture events on your application.
+/// Enable mouse capture events.
 ///
-/// This is optional as it can cause a spam of your update method.
+/// Necessary if your application involves tracking or interacting with the cursor.
 pub fn enable_mouse_capture() -> std::io::Result<()> {
     crossterm::execute!(std::io::stdout(), crossterm::event::EnableMouseCapture)
 }

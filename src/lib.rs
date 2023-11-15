@@ -1,37 +1,40 @@
-use std::io::Result;
-
 pub use crossterm;
-pub use message::Message;
-pub use model::Model;
-pub use program::enable_mouse_capture;
 
-use command::Command;
+pub use model::{batch, quit, Command, Message, Model};
 
-pub mod command;
 pub mod components;
 pub mod event;
 
+mod cursor;
+mod error;
+mod font;
 mod foreign;
-mod message;
 mod model;
-mod program;
+mod screen;
+
+/// Enables mouse capture events on your application.
+///
+/// This is optional as it can cause a spam of your update method.
+pub fn enable_mouse_capture() -> std::io::Result<()> {
+    crossterm::execute!(std::io::stdout(), crossterm::event::EnableMouseCapture)
+}
 
 /// Execute a model.
-pub fn execute(model: impl Model) -> Result<()> {
+pub fn execute(model: impl Model) -> std::io::Result<()> {
     let mut model = model;
     let mut stdout = std::io::stdout();
 
-    let (msg_tx, msg_rx) = std::sync::mpsc::channel::<Message>();
+    let (msg_tx, msg_rx) = std::sync::mpsc::channel::<model::Message>();
     let msg_tx2 = msg_tx.clone();
 
-    let (cmd_tx, cmd_rx) = std::sync::mpsc::channel::<Command>();
+    let (cmd_tx, cmd_rx) = std::sync::mpsc::channel::<model::Command>();
     let cmd_tx2 = cmd_tx.clone();
 
     std::thread::spawn(move || loop {
         match crossterm::event::read().unwrap() {
             crossterm::event::Event::Key(event) => msg_tx.send(Box::new(event)).unwrap(),
             crossterm::event::Event::Mouse(event) => msg_tx.send(Box::new(event)).unwrap(),
-            crossterm::event::Event::Resize(x, y) => {
+            crossterm:: event::Event::Resize(x, y) => {
                 msg_tx.send(Box::new(event::ResizeEvent(x, y))).unwrap()
             }
             _ => {}
@@ -61,10 +64,10 @@ pub fn execute(model: impl Model) -> Result<()> {
 
     loop {
         let msg = msg_rx.recv().unwrap();
-        if msg.is::<command::QuitMessage>() {
+        if msg.is::<model::QuitMessage>() {
             break;
-        } else if msg.is::<command::BatchMessage>() {
-            let batch = msg.downcast::<command::BatchMessage>().unwrap();
+        } else if msg.is::<model::BatchMessage>() {
+            let batch = msg.downcast::<model::BatchMessage>().unwrap();
             for cmd in batch.0 {
                 cmd_tx.send(cmd).unwrap();
             }
@@ -84,8 +87,8 @@ pub fn execute(model: impl Model) -> Result<()> {
 fn initialize(
     stdout: &mut std::io::Stdout,
     model: &impl Model,
-    cmd_tx: std::sync::mpsc::Sender<Command>,
-) -> Result<()> {
+    cmd_tx: std::sync::mpsc::Sender<model::Command>,
+) -> std::io::Result<()> {
     if let Some(cmd) = model.init() {
         cmd_tx.send(cmd).unwrap();
     }
@@ -104,7 +107,7 @@ fn normalized_view(model: &impl Model) -> String {
     view.replace('\n', "\r\n")
 }
 
-fn clear_lines(stdout: &mut std::io::Stdout, count: usize) -> Result<()> {
+fn clear_lines(stdout: &mut std::io::Stdout, count: usize) -> std::io::Result<()> {
     for _ in 0..count {
         crossterm::execute!(
             stdout,
@@ -116,70 +119,8 @@ fn clear_lines(stdout: &mut std::io::Stdout, count: usize) -> Result<()> {
     Ok(())
 }
 
-fn deinitialize(stdout: &mut std::io::Stdout) -> Result<()> {
+fn deinitialize(stdout: &mut std::io::Stdout) -> std::io::Result<()> {
     crossterm::execute!(stdout, crossterm::cursor::Show)?;
     crossterm::execute!(stdout, crossterm::event::DisableMouseCapture)?;
     crossterm::terminal::disable_raw_mode()
-}
-
-#[cfg(test)]
-mod tests {
-    // use cate::{
-    //     model::{Info, Update},
-    //     Model, Program,
-    // };
-
-    // #[test]
-    // pub fn test_main() {
-    //     let mut p = Program::new(Box::new(Bonk(10)));
-    //     p.run();
-    // }
-
-    // struct Bonk(i32);
-
-    // enum MessageKind {
-    //     Exit,
-    //     Test,
-    // }
-
-    // impl Info for MessageKind {
-    //     fn exit(&self) -> bool {
-    //         match self {
-    //             MessageKind::Exit => true,
-    //             MessageKind::Test => false,
-    //         }
-    //     }
-
-    //     fn error(&self) -> bool {
-    //         match self {
-    //             MessageKind::Exit => false,
-    //             MessageKind::Test => false,
-    //         }
-    //     }
-    // }
-
-    // impl Model<MessageKind> for Bonk {
-    //     fn init(&self) -> Update<MessageKind> {
-    //         Update {
-    //             model: Some(Box::new(Bonk(50))),
-    //             command: Some(|| MessageKind::Test),
-    //         }
-    //     }
-
-    //     fn update(&self, message: MessageKind) -> Update<MessageKind> {
-    //         match message {
-    //             MessageKind::Exit => println!("received exit message (omg)"),
-    //             MessageKind::Test => println!("received test message!"),
-    //         }
-
-    //         Update {
-    //             model: None,
-    //             command: None,
-    //         }
-    //     }
-
-    //     fn view(&self) -> String {
-    //         format!("my number is: {}\n", self.0)
-    //     }
-    // }
 }

@@ -1,3 +1,3 @@
-pub use input::Input;
+pub use text_input::TextInput;
 
-mod input;
+mod text_input;

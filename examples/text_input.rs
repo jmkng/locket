@@ -30,7 +30,7 @@ impl Model for InputModel {
             locket::with_exit!(event);
 
             match event.code {
-                // `Enter` means the user is done typing.
+                // Display the greeting.
                 KeyCode::Enter => {
                     let buffer_text = self.input.buffer();
                     if !buffer_text.is_empty() {

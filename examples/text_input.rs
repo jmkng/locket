@@ -32,9 +32,8 @@ impl Model for InputModel {
             match event.code {
                 // Display the greeting.
                 KeyCode::Enter => {
-                    let buffer_text = self.input.buffer();
-                    if !buffer_text.is_empty() {
-                        self.name = Some(buffer_text);
+                    if !self.input.buffer().is_empty() {
+                        self.name = Some(self.input.buffer().to_string());
                         self.input.clear();
                     }
 

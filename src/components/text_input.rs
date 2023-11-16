@@ -92,16 +92,21 @@ impl TextInput {
     ///
     /// This action does not clear the buffer, to do that you should also
     /// call `.clear`.
-    pub fn buffer(&self) -> String {
-        self.buffer.clone()
+    pub fn buffer(&self) -> &str {
+        &self.buffer
     }
 
     /// Set the buffer to the given string.
     ///
     /// The cursor position is moved to the end of the buffer.
-    pub fn set_buffer(&mut self, buffer: String) {
-        self.position = buffer.len();
-        self.buffer = buffer;
+    pub fn set_buffer<T>(&mut self, buffer: T)
+    where
+        T: Into<String>,
+    {
+        let as_string = buffer.into();
+
+        self.position = as_string.len();
+        self.buffer = as_string;
     }
 
     /// Return the current position within the buffer.

@@ -10,7 +10,7 @@ pub trait Model {
     }
 
     /// Called every time the application receives a `Message`.
-    fn update(&mut self, msg: Message) -> Option<Command>;
+    fn update(&mut self, message: &Message) -> Option<Command>;
 
     /// Returns the interfaceCalled after `update`
     fn view(&self) -> String;

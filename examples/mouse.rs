@@ -15,8 +15,8 @@ struct MouseModel {
 }
 
 impl Model for MouseModel {
-    fn update(&mut self, msg: Message) -> Option<Command> {
-        if let Ok(mouse_event) = msg.downcast::<MouseEvent>() {
+    fn update(&mut self, message: &Message) -> Option<Command> {
+        if let Some(mouse_event) = message.downcast_ref::<MouseEvent>() {
             if let MouseEventKind::Down(_) = mouse_event.kind {
                 return Some(Box::new(exit));
             }

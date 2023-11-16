@@ -40,18 +40,18 @@ pub fn execute(model: impl Model) -> std::io::Result<()> {
     let mut model = model;
     let mut stdout = std::io::stdout();
 
-    let (msg_tx, msg_rx) = std::sync::mpsc::channel::<model::Message>();
-    let msg_tx2 = msg_tx.clone();
+    let (message_tx, message_rx) = std::sync::mpsc::channel::<model::Message>();
+    let message_tx_2 = message_tx.clone();
 
-    let (cmd_tx, cmd_rx) = std::sync::mpsc::channel::<model::Command>();
-    let cmd_tx2 = cmd_tx.clone();
+    let (command_tx, command_rx) = std::sync::mpsc::channel::<model::Command>();
+    let command_tx_2 = command_tx.clone();
 
     std::thread::spawn(move || loop {
         match crossterm::event::read().unwrap() {
-            crossterm::event::Event::Key(event) => msg_tx.send(Box::new(event)).unwrap(),
-            crossterm::event::Event::Mouse(event) => msg_tx.send(Box::new(event)).unwrap(),
+            crossterm::event::Event::Key(event) => message_tx.send(Box::new(event)).unwrap(),
+            crossterm::event::Event::Mouse(event) => message_tx.send(Box::new(event)).unwrap(),
             crossterm:: event::Event::Resize(x, y) => {
-                msg_tx.send(Box::new(event::ResizeEvent(x, y))).unwrap()
+                message_tx.send(Box::new(event::ResizeEvent(x, y))).unwrap()
             }
             _ => {}
             // crossterm::event::Event::FocusGained => todo!(),
@@ -61,12 +61,12 @@ pub fn execute(model: impl Model) -> std::io::Result<()> {
     });
 
     std::thread::spawn(move || loop {
-        let cmd = match cmd_rx.recv() {
+        let cmd = match command_rx.recv() {
             Ok(cmd) => cmd,
             Err(_) => return,
         };
 
-        let msg_tx2 = msg_tx2.clone();
+        let msg_tx2 = message_tx_2.clone();
         std::thread::spawn(move || {
             if let Some(msg) = cmd() {
                 msg_tx2.send(msg).unwrap();
@@ -74,21 +74,21 @@ pub fn execute(model: impl Model) -> std::io::Result<()> {
         });
     });
 
-    initialize(&mut stdout, &model, cmd_tx2)?;
+    initialize(&mut stdout, &model, command_tx_2)?;
     let mut prev = normalized_view(&model);
     crossterm::execute!(stdout, crossterm::style::Print(&prev))?;
 
     loop {
-        let msg = msg_rx.recv().unwrap();
-        if msg.is::<model::ExitMessage>() {
+        let message = message_rx.recv().unwrap();
+        if message.is::<model::ExitMessage>() {
             break;
-        } else if msg.is::<model::BatchMessage>() {
-            let batch = msg.downcast::<model::BatchMessage>().unwrap();
+        } else if message.is::<model::BatchMessage>() {
+            let batch = message.downcast::<model::BatchMessage>().unwrap();
             for cmd in batch.0 {
-                cmd_tx.send(cmd).unwrap();
+                command_tx.send(cmd).unwrap();
             }
-        } else if let Some(cmd) = model.update(msg) {
-            cmd_tx.send(cmd).unwrap();
+        } else if let Some(cmd) = model.update(&message) {
+            command_tx.send(cmd).unwrap();
         }
 
         let curr = normalized_view(&model);

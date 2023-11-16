@@ -19,11 +19,11 @@ struct ResizeModel {
 }
 
 impl Model for ResizeModel {
-    fn update(&mut self, msg: Message) -> Option<Command> {
-        if let Some(event) = msg.downcast_ref::<KeyEvent>() {
+    fn update(&mut self, message: &Message) -> Option<Command> {
+        if let Some(event) = message.downcast_ref::<KeyEvent>() {
             locket::with_exit!(event);
         };
-        if let Ok(resize_event) = msg.downcast::<ResizeEvent>() {
+        if let Some(resize_event) = message.downcast_ref::<ResizeEvent>() {
             self.moved = true;
             self.terminal_x = resize_event.0;
             self.terminal_y = resize_event.1;

@@ -13,8 +13,8 @@ struct KeypressModel {
 }
 
 impl Model for KeypressModel {
-    fn update(&mut self, msg: Message) -> Option<Command> {
-        if let Ok(event) = msg.downcast::<KeyEvent>() {
+    fn update(&mut self, message: &Message) -> Option<Command> {
+        if let Some(event) = message.downcast_ref::<KeyEvent>() {
             locket::with_exit!(event);
 
             match event.code {

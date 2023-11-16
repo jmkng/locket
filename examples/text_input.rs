@@ -13,15 +13,20 @@ fn main() {
 }
 
 struct InputModel {
+    // A prompt question to ask the user for their name.
     prompt: String,
+    // The name given by the user.
+    //
+    // When populated, a greeting is displayed beneath the input.
     name: Option<String>,
 
+    // Nested `TextInput` component will handle the input field.
     input: TextInput,
 }
 
 impl Model for InputModel {
-    fn update(&mut self, msg: Message) -> Option<Command> {
-        if let Ok(event) = msg.downcast::<KeyEvent>() {
+    fn update(&mut self, message: &Message) -> Option<Command> {
+        if let Some(event) = message.downcast_ref::<KeyEvent>() {
             locket::with_exit!(event);
 
             match event.code {
@@ -32,12 +37,17 @@ impl Model for InputModel {
                         self.name = Some(buffer_text);
                         self.input.clear();
                     }
+
                     return None;
                 }
-                // Other keystrokes go to the nested TextInput.
-                _ => self.input.handle_key(*event),
+
+                _ => {}
             }
         };
+
+        // Propagate message to nested components.
+        // ↓
+        self.input.update(message);
 
         None
     }

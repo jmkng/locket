@@ -2,7 +2,7 @@ use std::fmt::Write;
 
 use crate::crossterm::event::{KeyCode, KeyEvent};
 use crate::{
-    font::{fill_background, WHITE},
+    font::{fill_background, DEFAULT, WHITE},
     Command, Message, Model,
 };
 
@@ -22,19 +22,26 @@ pub struct TextInput {
 
 impl Default for TextInput {
     fn default() -> Self {
-        Self::new(WHITE, 29)
+        Self::new(WHITE, DEFAULT)
     }
 }
 
 impl Model for TextInput {
-    fn update(&mut self, msg: Message) -> Option<Command> {
-        if let Ok(event) = msg.downcast::<KeyEvent>() {
+    fn update(&mut self, message: &Message) -> Option<Command> {
+        if let Some(event) = message.downcast_ref::<KeyEvent>() {
             match event.code {
-                KeyCode::Enter => {
-                    self.clear();
-                    return None;
-                }
-                _ => self.handle_key(*event),
+                // Movement.
+                KeyCode::Left => self.handle_left(),
+                KeyCode::Right => self.handle_right(),
+
+                // Delete.
+                KeyCode::Backspace => self.handle_backspace(),
+
+                // Insert.
+                KeyCode::Char(c) => self.handle_char(c),
+
+                // No action.
+                _ => {}
             }
         };
 
@@ -45,9 +52,9 @@ impl Model for TextInput {
         if self.buffer.is_empty() {
             return fill_background(" ", self.fill, self.background);
         }
+
         let mut buffer = String::with_capacity(self.buffer.len());
         buffer.write_str(&self.buffer[..self.position]).unwrap();
-
         if self.position < self.buffer.len() {
             let cursor_char: String = self.buffer[self.position..=self.position].to_string();
             buffer
@@ -105,27 +112,6 @@ impl TextInput {
     /// Set the position.
     pub fn set_position(&mut self, pos: usize) {
         self.position = pos;
-    }
-
-    /// Respond to a `KeyEvent`.
-    ///
-    /// This is a dispatch function that will call some `handle_*` function
-    /// based on the key code.
-    pub fn handle_key(&mut self, event: KeyEvent) {
-        match event.code {
-            // Movement keys.
-            KeyCode::Left => self.handle_left(),
-            KeyCode::Right => self.handle_right(),
-
-            // Delete.
-            KeyCode::Backspace => self.handle_backspace(),
-
-            // Insert.
-            KeyCode::Char(c) => self.handle_char(c),
-
-            // No response.
-            _ => {}
-        }
     }
 
     /// Delete one character behind the current position, and move the cursor back.

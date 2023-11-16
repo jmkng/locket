@@ -1,4 +1,5 @@
 use locket::crossterm::event::{KeyCode, KeyEvent};
+use locket::font::FontBuilder;
 use locket::{components::List, font::MAROON, Command, Message, Model};
 
 /// Display an input field to collect a name, and display a greeting.
@@ -45,9 +46,10 @@ impl Model for ListModel {
             "{}\n\n{}\n\n{}",
             "Select one:",
             self.list.view(),
-            self.choice
-                .as_ref()
-                .map_or(String::new(), |n| format!("You selected: {}", n))
+            self.choice.as_ref().map_or(String::new(), |n| format!(
+                "You selected: {}",
+                FontBuilder::new(n).underline().bold().to_string()
+            ))
         )
     }
 }

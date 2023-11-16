@@ -110,13 +110,6 @@ pub const AQUA: u8 = 14;
 /// https://en.wikipedia.org/wiki/Xterm
 pub const WHITE: u8 = 15;
 
-/// `SpringGreen` XTERM 256.
-///
-/// Not a public color, just a default used by Locket.
-///
-/// https://en.wikipedia.org/wiki/Xterm
-pub(crate) const DEFAULT: u8 = 29;
-
 /// Decorate a string with styles.
 ///
 /// # Examples

@@ -2,7 +2,7 @@ use std::fmt::Write;
 
 use crate::crossterm::event::{KeyCode, KeyEvent};
 use crate::{
-    font::{fill_background, DEFAULT, WHITE},
+    font::{fill_background, MAROON, WHITE},
     Command, Message, Model,
 };
 
@@ -22,7 +22,7 @@ pub struct TextInput {
 
 impl Default for TextInput {
     fn default() -> Self {
-        Self::new(WHITE, DEFAULT)
+        Self::new(WHITE, MAROON)
     }
 }
 
@@ -115,8 +115,6 @@ impl TextInput {
     }
 
     /// Delete one character behind the current position, and move the cursor back.
-    ///
-    /// Response to a `KeyEvent::Backspace`.
     fn handle_backspace(&mut self) {
         if self.position > 0 {
             self.buffer.remove(self.position - 1);
@@ -124,17 +122,13 @@ impl TextInput {
         }
     }
 
-    /// Insert the character the current position, and move the cursor forward.
-    ///
-    /// Response to a `KeyEvent::Char`
+    /// Insert the character at the current position, and move the cursor forward.
     fn handle_char(&mut self, c: char) {
         self.buffer.insert(self.position, c);
         self.position += 1;
     }
 
     /// Move the cursor to the left, if possible.
-    ///
-    /// Response to a `KeyEvent::Left`
     fn handle_left(&mut self) {
         if self.position > 0 {
             self.position -= 1;
@@ -142,8 +136,6 @@ impl TextInput {
     }
 
     /// Move the cursor to the right, if possible.
-    ///
-    /// Response to a `KeyEvent::Right`
     fn handle_right(&mut self) {
         if self.position < self.buffer.len() {
             self.position += 1;

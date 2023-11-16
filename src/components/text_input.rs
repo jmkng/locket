@@ -1,8 +1,8 @@
 use std::fmt::Write;
 
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{KeyCode, KeyEvent};
 
-use crate::{quit, Command, Message, Model};
+use crate::{Command, Message, Model};
 
 /// Text input component.
 ///
@@ -24,20 +24,13 @@ impl Default for TextInput {
 
 impl Model for TextInput {
     fn update(&mut self, msg: Message) -> Option<Command> {
-        if let Ok(key_event) = msg.downcast::<KeyEvent>() {
-            if let KeyModifiers::CONTROL = key_event.modifiers {
-                match key_event.code {
-                    KeyCode::Char('c') => return Some(Box::new(quit)),
-                    _ => return None,
-                }
-            }
-
-            match key_event.code {
+        if let Ok(event) = msg.downcast::<KeyEvent>() {
+            match event.code {
                 KeyCode::Enter => {
                     self.clear();
                     return None;
                 }
-                _ => self.handle_key(*key_event),
+                _ => self.handle_key(*event),
             }
         };
 

@@ -1,11 +1,11 @@
 use super::Command;
 
 /// A command that will exit the Locket application.
-pub struct QuitMessage;
+pub struct ExitMessage;
 
 /// Exit the application.
-pub fn quit() -> Option<Message> {
-    Some(Box::new(QuitMessage))
+pub fn exit() -> Option<Message> {
+    Some(Box::new(ExitMessage))
 }
 
 /// Any boxed type that may or may not contain data.

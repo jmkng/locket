@@ -1,4 +1,4 @@
-pub use self::command::{batch, quit, BatchMessage, Command, Message, QuitMessage};
+pub use self::command::{batch, exit, BatchMessage, Command, ExitMessage, Message};
 
 mod command;
 

@@ -6,7 +6,7 @@ fn main() {
     let model = InputModel {
         prompt: "What is your name?".to_string(),
         name: None,
-        input: TextInput::default(), // Equivalent to: TextInput::new(29, 231)
+        input: TextInput::default(), // Equivalent to: TextInput::new(15, 29)
     };
 
     locket::execute(model).unwrap();

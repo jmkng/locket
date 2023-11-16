@@ -5,8 +5,8 @@ use locket::{components::TextInput, Command, Message, Model};
 fn main() {
     let model = InputModel {
         prompt: "What is your name?".to_string(),
-        input: TextInput::new(29),
         name: None,
+        input: TextInput::new(29),
     };
 
     locket::flush!().unwrap();
@@ -15,8 +15,9 @@ fn main() {
 
 struct InputModel {
     prompt: String,
-    input: TextInput,
     name: Option<String>,
+
+    input: TextInput,
 }
 
 impl Model for InputModel {
@@ -25,7 +26,7 @@ impl Model for InputModel {
             locket::with_exit!(event);
 
             match event.code {
-                // `Enter` will mean the user is done typing.
+                // `Enter` means the user is done typing.
                 KeyCode::Enter => {
                     let buffer_text = self.input.buffer();
                     if !buffer_text.is_empty() {
@@ -34,7 +35,7 @@ impl Model for InputModel {
                     }
                     return None;
                 }
-                // Pass any other keystrokes through to the input component.
+                // Other keystrokes go to the nested TextInput.
                 _ => self.input.handle_key(*event),
             }
         };

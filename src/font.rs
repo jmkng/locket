@@ -110,7 +110,7 @@ pub const AQUA: u8 = 14;
 /// https://en.wikipedia.org/wiki/Xterm
 pub const WHITE: u8 = 15;
 
-/// Annotate a string with styles.
+/// Decorate a string with styles.
 ///
 /// # Examples
 ///

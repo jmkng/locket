@@ -8,11 +8,7 @@ macro_rules! flush {
             let result = $block;
         )*
 
-        if let Err(error) = std::io::stdout().flush() {
-            Err(error)
-        } else {
-            Ok(())
-        }
+        std::io::stdout().flush()
     }};
 }
 

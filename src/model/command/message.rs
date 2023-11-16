@@ -13,7 +13,7 @@ pub fn exit() -> Option<Message> {
 /// You may use `downcast_ref` to determine the type of the message,
 /// and extract any required information.
 ///
-/// # Example
+/// # Examples
 ///
 /// ```
 /// struct HttpResponse(String);

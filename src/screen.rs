@@ -1,4 +1,7 @@
-/// Execute a block expression and immediately flush stdout.
+/// Flush `stdout`.
+///
+/// You may optionally pass in an expression that will be evaluated
+/// before flushing.
 #[macro_export]
 macro_rules! flush {
     ($($block:expr);*) => {{

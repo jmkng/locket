@@ -1,8 +1,5 @@
-use locket::{
-    components::TextInput,
-    crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
-    quit, Command, Message, Model,
-};
+use locket::crossterm::event::{KeyCode, KeyEvent};
+use locket::{components::TextInput, Command, Message, Model};
 
 /// Display an input field to collect a name, and display a greeting.
 fn main() {
@@ -12,6 +9,7 @@ fn main() {
         name: None,
     };
 
+    locket::flush!().unwrap();
     locket::execute(model).unwrap();
 }
 
@@ -23,17 +21,10 @@ struct InputModel {
 
 impl Model for InputModel {
     fn update(&mut self, msg: Message) -> Option<Command> {
-        if let Ok(key_event) = msg.downcast::<KeyEvent>() {
-            if let KeyModifiers::CONTROL = key_event.modifiers {
-                match key_event.code {
-                    KeyCode::Char('c') => return Some(Box::new(quit)),
-                    _ => return None,
-                }
-            }
+        if let Ok(event) = msg.downcast::<KeyEvent>() {
+            locket::with_exit!(event);
 
-            // TODO: ^ check will be pretty common, might need a macro to help with that.
-
-            match key_event.code {
+            match event.code {
                 // `Enter` will mean the user is done typing.
                 KeyCode::Enter => {
                     let buffer_text = self.input.buffer();
@@ -44,7 +35,7 @@ impl Model for InputModel {
                     return None;
                 }
                 // Pass any other keystrokes through to the input component.
-                _ => self.input.handle_key(*key_event),
+                _ => self.input.handle_key(*event),
             }
         };
 

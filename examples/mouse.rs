@@ -1,13 +1,11 @@
-use locket::{
-    crossterm::event::{MouseEvent, MouseEventKind},
-    quit, Command, Message, Model,
-};
+use locket::crossterm::event::{MouseEvent, MouseEventKind};
+use locket::{exit, Command, Message, Model};
 
 /// Display the cursor position as it moves within the terminal.
 fn main() {
     let model = MouseModel { col: 0, row: 0 };
 
-    locket::enable_mouse_capture().unwrap();
+    locket::with_mouse_capture!().unwrap();
     locket::execute(model).unwrap();
 }
 
@@ -20,7 +18,7 @@ impl Model for MouseModel {
     fn update(&mut self, msg: Message) -> Option<Command> {
         if let Ok(mouse_event) = msg.downcast::<MouseEvent>() {
             if let MouseEventKind::Down(_) = mouse_event.kind {
-                return Some(Box::new(quit));
+                return Some(Box::new(exit));
             }
             self.col = mouse_event.column;
             self.row = mouse_event.row;

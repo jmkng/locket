@@ -1,5 +1,5 @@
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use locket::{event::ResizeEvent, quit, Command, Message, Model};
+use locket::crossterm::event::{KeyCode, KeyEvent};
+use locket::{event::ResizeEvent, Command, Message, Model};
 
 /// Display the terminal dimensions as it is resized.
 fn main() {
@@ -20,15 +20,9 @@ struct ResizeModel {
 
 impl Model for ResizeModel {
     fn update(&mut self, msg: Message) -> Option<Command> {
-        if let Some(key_event) = msg.downcast_ref::<KeyEvent>() {
-            if let KeyModifiers::CONTROL = key_event.modifiers {
-                match key_event.code {
-                    KeyCode::Char('c') => return Some(Box::new(quit)),
-                    _ => return None,
-                }
-            }
+        if let Some(event) = msg.downcast_ref::<KeyEvent>() {
+            locket::with_exit!(event);
         };
-
         if let Ok(resize_event) = msg.downcast::<ResizeEvent>() {
             self.moved = true;
             self.terminal_x = resize_event.0;

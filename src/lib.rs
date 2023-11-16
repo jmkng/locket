@@ -1,6 +1,6 @@
 pub use crossterm;
 
-pub use model::{batch, quit, Command, Message, Model};
+pub use model::{batch, exit, Command, Message, Model};
 
 pub mod components;
 pub mod event;
@@ -15,8 +15,25 @@ mod screen;
 /// Enable mouse capture events.
 ///
 /// Necessary if your application involves tracking or interacting with the cursor.
-pub fn enable_mouse_capture() -> std::io::Result<()> {
-    crossterm::execute!(std::io::stdout(), crossterm::event::EnableMouseCapture)
+#[macro_export]
+macro_rules! with_mouse_capture {
+    () => {
+        crossterm::execute!(std::io::stdout(), crossterm::event::EnableMouseCapture)
+    };
+}
+
+/// Exit the application when a message containing a `ctrl-c` key event
+/// is received.
+#[macro_export]
+macro_rules! with_exit {
+    ($event:expr) => {
+        if let crossterm::event::KeyModifiers::CONTROL = $event.modifiers {
+            match $event.code {
+                KeyCode::Char('c') => return Some(Box::new(locket::exit)),
+                _ => return None,
+            }
+        }
+    };
 }
 
 /// Execute a model.
@@ -64,7 +81,7 @@ pub fn execute(model: impl Model) -> std::io::Result<()> {
 
     loop {
         let msg = msg_rx.recv().unwrap();
-        if msg.is::<model::QuitMessage>() {
+        if msg.is::<model::ExitMessage>() {
             break;
         } else if msg.is::<model::BatchMessage>() {
             let batch = msg.downcast::<model::BatchMessage>().unwrap();

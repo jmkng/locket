@@ -1,7 +1,5 @@
-use locket::{
-    crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
-    quit, Command, Message, Model,
-};
+use locket::crossterm::event::{KeyCode, KeyEvent};
+use locket::{Command, Message, Model};
 
 /// Display keyboard input as it is received.
 fn main() {
@@ -16,15 +14,10 @@ struct KeypressModel {
 
 impl Model for KeypressModel {
     fn update(&mut self, msg: Message) -> Option<Command> {
-        if let Ok(key_event) = msg.downcast::<KeyEvent>() {
-            if let KeyModifiers::CONTROL = key_event.modifiers {
-                match key_event.code {
-                    KeyCode::Char('c') => return Some(Box::new(quit)),
-                    _ => return None,
-                }
-            }
+        if let Ok(event) = msg.downcast::<KeyEvent>() {
+            locket::with_exit!(event);
 
-            match key_event.code {
+            match event.code {
                 KeyCode::Char(c) => {
                     self.last_key = Some(c);
                     return None;

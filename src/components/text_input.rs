@@ -1,8 +1,10 @@
 use std::fmt::Write;
 
-use crossterm::event::{KeyCode, KeyEvent};
-
-use crate::{Command, Message, Model};
+use crate::crossterm::event::{KeyCode, KeyEvent};
+use crate::{
+    font::{fill_background, WHITE},
+    Command, Message, Model,
+};
 
 /// Text input component.
 ///
@@ -11,14 +13,16 @@ pub struct TextInput {
     /// Internal buffer containing the text in the field.
     buffer: String,
     /// Position of cursor within the buffer.
-    pos: usize,
-    /// The color of the cursor.
-    cursor_color: u8,
+    position: usize,
+    /// The font color of the character under the cursor.
+    fill: u8,
+    /// The background color of the cursor.
+    background: u8,
 }
 
 impl Default for TextInput {
     fn default() -> Self {
-        Self::new(29)
+        Self::new(WHITE, 29)
     }
 }
 
@@ -39,18 +43,21 @@ impl Model for TextInput {
 
     fn view(&self) -> String {
         if self.buffer.is_empty() {
-            return self.stroke_as_cursor(" ");
+            return fill_background(" ", self.fill, self.background);
         }
         let mut buffer = String::with_capacity(self.buffer.len());
-        buffer.write_str(&self.buffer[..self.pos]).unwrap();
-        if self.pos < self.buffer.len() {
-            let cursor_char: String = self.buffer[self.pos..=self.pos].to_string();
+        buffer.write_str(&self.buffer[..self.position]).unwrap();
+
+        if self.position < self.buffer.len() {
+            let cursor_char: String = self.buffer[self.position..=self.position].to_string();
             buffer
-                .write_str(&self.stroke_as_cursor(&cursor_char))
+                .write_str(&fill_background(cursor_char, self.fill, self.background))
                 .unwrap();
-            buffer.write_str(&self.buffer[self.pos + 1..]).unwrap();
+            buffer.write_str(&self.buffer[self.position + 1..]).unwrap();
         } else {
-            buffer.write_str(&self.stroke_as_cursor(" ")).unwrap();
+            buffer
+                .write_str(&fill_background(" ", self.fill, self.background))
+                .unwrap();
         }
 
         buffer
@@ -59,26 +66,19 @@ impl Model for TextInput {
 
 impl TextInput {
     /// Return a new instance of `Input`.
-    pub fn new(cursor_color: u8) -> Self {
+    pub fn new(fill: u8, background: u8) -> Self {
         Self {
             buffer: String::new(),
-            pos: 0,
-            cursor_color,
+            position: 0,
+            fill,
+            background,
         }
-    }
-
-    /// Return a string highlighted with the color in `self.cursor_color`.
-    pub fn stroke_as_cursor<T>(&self, text: T) -> String
-    where
-        T: AsRef<str>,
-    {
-        format!("\x1B[48;5;{}m{}\x1B[0m", self.cursor_color, text.as_ref())
     }
 
     /// Clear the buffer.
     pub fn clear(&mut self) {
         self.buffer.clear();
-        self.pos = 0;
+        self.position = 0;
     }
 
     /// Return the buffer.
@@ -93,18 +93,18 @@ impl TextInput {
     ///
     /// The cursor position is moved to the end of the buffer.
     pub fn set_buffer(&mut self, buffer: String) {
-        self.pos = buffer.len();
+        self.position = buffer.len();
         self.buffer = buffer;
     }
 
     /// Return the current position within the buffer.
     pub fn position(&self) -> usize {
-        self.pos
+        self.position
     }
 
     /// Set the position.
     pub fn set_position(&mut self, pos: usize) {
-        self.pos = pos;
+        self.position = pos;
     }
 
     /// Respond to a `KeyEvent`.
@@ -132,9 +132,9 @@ impl TextInput {
     ///
     /// Response to a `KeyEvent::Backspace`.
     fn handle_backspace(&mut self) {
-        if self.pos > 0 {
-            self.buffer.remove(self.pos - 1);
-            self.pos -= 1;
+        if self.position > 0 {
+            self.buffer.remove(self.position - 1);
+            self.position -= 1;
         }
     }
 
@@ -142,16 +142,16 @@ impl TextInput {
     ///
     /// Response to a `KeyEvent::Char`
     fn handle_char(&mut self, c: char) {
-        self.buffer.insert(self.pos, c);
-        self.pos += 1;
+        self.buffer.insert(self.position, c);
+        self.position += 1;
     }
 
     /// Move the cursor to the left, if possible.
     ///
     /// Response to a `KeyEvent::Left`
     fn handle_left(&mut self) {
-        if self.pos > 0 {
-            self.pos -= 1;
+        if self.position > 0 {
+            self.position -= 1;
         }
     }
 
@@ -159,8 +159,8 @@ impl TextInput {
     ///
     /// Response to a `KeyEvent::Right`
     fn handle_right(&mut self) {
-        if self.pos < self.buffer.len() {
-            self.pos += 1;
+        if self.position < self.buffer.len() {
+            self.position += 1;
         }
     }
 }

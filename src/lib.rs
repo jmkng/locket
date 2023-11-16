@@ -1,13 +1,12 @@
 pub use crossterm;
 
 pub use model::{batch, exit, Command, Message, Model};
-
 pub mod components;
 pub mod event;
+pub mod font;
 
 mod cursor;
 mod error;
-mod font;
 mod foreign;
 mod model;
 mod screen;

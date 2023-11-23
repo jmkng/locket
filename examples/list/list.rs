@@ -5,7 +5,16 @@ use locket::{components::List, font::MAROON, Command, Message, Model};
 /// Display an input field to collect a name, and display a greeting.
 fn main() {
     let model = ListModel {
-        list: List::new(vec!["One".into(), "Two".into(), "Three".into()], MAROON),
+        list: List::new(
+            vec![
+                "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
+            ]
+            .into_iter()
+            .map(|n| n.to_string()),
+            5,
+            1,
+            MAROON,
+        ),
         choice: None,
     };
 
@@ -13,10 +22,10 @@ fn main() {
 }
 
 struct ListModel {
+    choice: Option<String>,
+
     // Nested `List` component will handle the list.
     list: List,
-
-    choice: Option<String>,
 }
 
 impl Model for ListModel {
@@ -33,9 +42,6 @@ impl Model for ListModel {
                 _ => {}
             }
         };
-
-        // Propagate message to nested components.
-        // ↓
         self.list.update(message);
 
         None

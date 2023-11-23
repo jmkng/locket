@@ -1,6 +1,8 @@
 pub use crossterm;
+pub use model::{batch, exit};
+pub use model::{Command, Message, Model};
+pub use utility::Viewport;
 
-pub use model::{batch, exit, Command, Message, Model};
 pub mod components;
 pub mod event;
 pub mod font;
@@ -10,6 +12,7 @@ mod error;
 mod foreign;
 mod model;
 mod screen;
+mod utility;
 
 /// Enable mouse capture events.
 ///
@@ -53,6 +56,7 @@ pub fn execute(model: impl Model) -> std::io::Result<()> {
             crossterm:: event::Event::Resize(x, y) => {
                 message_tx.send(Box::new(event::ResizeEvent(x, y))).unwrap()
             }
+            
             _ => {}
             // crossterm::event::Event::FocusGained => todo!(),
             // crossterm::event::Event::FocusLost => todo!(),
@@ -75,7 +79,7 @@ pub fn execute(model: impl Model) -> std::io::Result<()> {
     });
 
     initialize(&mut stdout, &model, command_tx_2)?;
-    let mut prev = normalized_view(&model);
+    let mut prev = utility::normalize_endings(model.view());
     crossterm::execute!(stdout, crossterm::style::Print(&prev))?;
 
     loop {
@@ -91,7 +95,7 @@ pub fn execute(model: impl Model) -> std::io::Result<()> {
             command_tx.send(cmd).unwrap();
         }
 
-        let curr = normalized_view(&model);
+        let curr = utility::normalize_endings(model.view());
         clear_lines(&mut stdout, prev.matches("\r\n").count())?;
         crossterm::execute!(stdout, crossterm::style::Print(&curr))?;
         prev = curr;
@@ -113,14 +117,10 @@ fn initialize(
     crossterm::execute!(stdout, crossterm::cursor::Hide)
 }
 
-fn normalized_view(model: &impl Model) -> String {
-    let view = model.view();
-    let view = if !view.ends_with('\n') {
-        view + "\n"
-    } else {
-        view
-    };
-    view.replace('\n', "\r\n")
+fn deinitialize(stdout: &mut std::io::Stdout) -> std::io::Result<()> {
+    crossterm::execute!(stdout, crossterm::cursor::Show)?;
+    crossterm::execute!(stdout, crossterm::event::DisableMouseCapture)?;
+    crossterm::terminal::disable_raw_mode()
 }
 
 fn clear_lines(stdout: &mut std::io::Stdout, count: usize) -> std::io::Result<()> {
@@ -133,10 +133,4 @@ fn clear_lines(stdout: &mut std::io::Stdout, count: usize) -> std::io::Result<()
     }
 
     Ok(())
-}
-
-fn deinitialize(stdout: &mut std::io::Stdout) -> std::io::Result<()> {
-    crossterm::execute!(stdout, crossterm::cursor::Show)?;
-    crossterm::execute!(stdout, crossterm::event::DisableMouseCapture)?;
-    crossterm::terminal::disable_raw_mode()
 }

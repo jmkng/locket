@@ -120,7 +120,7 @@ pub const WHITE: u8 = 15;
 /// locket::font::FontBuilder::new("Hello, World!")
 ///     .bold()
 ///     .underline()
-///     .fill(locket::font::MAROON)
+///     .foreground(locket::font::MAROON)
 ///     .to_string();
 /// ```
 pub struct FontBuilder {
@@ -181,7 +181,7 @@ impl FontBuilder {
     }
 
     /// Apply a fill color.
-    pub fn fill(self, color: u8) -> Self {
+    pub fn foreground(self, color: u8) -> Self {
         Self {
             buffer: format!("\x1B[38;5;{}m{}", color, self.buffer),
         }
@@ -203,7 +203,7 @@ impl FontBuilder {
 }
 
 /// Return text with a fill color.
-pub fn fill<T>(text: T, color: u8) -> String
+pub fn foreground<T>(text: T, color: u8) -> String
 where
     T: AsRef<str>,
 {

@@ -1,8 +1,9 @@
 use std::fmt::Write;
 
 use crate::crossterm::event::{KeyCode, KeyEvent};
-use crate::font::fill;
-use crate::{Command, Message, Model};
+use crate::font::foreground;
+use crate::utility::BoundMap;
+use crate::{Command, Message, Model, Viewport};
 
 /// List component.
 ///
@@ -10,10 +11,15 @@ use crate::{Command, Message, Model};
 pub struct List {
     /// List items.
     items: Vec<String>,
+    /// The font color of the selected item.
+    foreground: u8,
     /// Index of the selected list item.
     position: Option<usize>,
-    /// The font color of the selected item.
-    fill: u8,
+    /// Calculated bounds of viewport.
+    bounds: BoundMap,
+
+    /// Nested viewport will handle pagination.
+    viewport: Viewport,
 }
 
 impl Model for List {
@@ -37,28 +43,37 @@ impl Model for List {
 
         for (item_index, item) in self.items.iter().enumerate() {
             let string = if self.position.map_or(false, |x| x == item_index) {
-                format!("{}", fill(item, self.fill))
+                format!("{}", foreground(item, self.foreground))
             } else {
                 format!("{item}")
             };
-
             write!(buffer, "{string}").unwrap();
+
             if item_index != self.items.len() - 1 {
-                write!(buffer, "\n").unwrap();
+                write!(buffer, "\r\n").unwrap();
             }
         }
 
-        buffer
+        self.viewport.render(buffer)
     }
 }
 
 impl List {
     /// Return a new instance of `Self`.
-    pub fn new(items: Vec<String>, fill: u8) -> Self {
+    pub fn new<T>(items: T, height: u16, scroll_by: u16, foreground: u8) -> Self
+    where
+        T: Iterator<Item = String>,
+    {
+        let items = Vec::from_iter(items);
+        let viewport = Viewport::new(height, scroll_by);
+        let bounds = viewport.bounds(items.len());
+
         Self {
             items,
             position: None,
-            fill,
+            foreground,
+            bounds,
+            viewport,
         }
     }
 
@@ -86,6 +101,12 @@ impl List {
         if let Some(index) = self.position {
             if index > 0 {
                 self.position = Some(index - 1);
+                let y = self.viewport.y() as usize;
+                if let Some(bound) = self.bounds.get(&y) {
+                    if index == bound.upper {
+                        self.viewport.up();
+                    }
+                }
             }
         } else {
             // Start from the bottom.
@@ -97,11 +118,42 @@ impl List {
     fn handle_down(&mut self) {
         if let Some(index) = self.position {
             if index < self.items.len() - 1 {
-                self.position = Some(index + 1)
+                self.position = Some(index + 1);
+                // TODO: Need to use Y position in self.bounds.get, not current index..
+                let y = self.viewport.y() as usize;
+                if let Some(bound) = self.bounds.get(&y) {
+                    if bound.lower.is_some_and(|n| n == index) {
+                        self.viewport.down();
+                    }
+                }
             }
         } else {
             // Start from the top.
             self.position = Some(0);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::font::MAROON;
+    use crate::model::Model;
+
+    use super::List;
+
+    #[test]
+    fn test_list() {
+        let mut list = List::new(
+            vec![
+                "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
+            ]
+            .into_iter()
+            .map(|n| n.to_string()),
+            5,
+            3,
+            MAROON,
+        );
+        list.viewport.down();
+        dbg!(list.view());
     }
 }

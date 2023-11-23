@@ -160,13 +160,13 @@ mod tests {
 
     #[test]
     fn test_render() {
-        let text = "one\r\ntwo\r\nthree\r\nfour\r\nfive\r\nsix\r\nseven\r\neight";
+        let text = "1\r\n2\r\n3\r\n4\r\n5\r\n6\r\n7\r\n8";
 
         let mut viewport = Viewport::new(10, 2);
         assert_eq!(viewport.down(), 2);
         assert_eq!(
             viewport.render(text),
-            "three\r\nfour\r\nfive\r\nsix\r\nseven\r\neight\r\n\r\n\r\n\r\n"
+            "3\r\n4\r\n5\r\n6\r\n7\r\n8\r\n\r\n\r\n\r\n"
         );
     }
 

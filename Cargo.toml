@@ -8,3 +8,28 @@ edition = "2021"
 [dependencies]
 libc = "0.2.150"
 crossterm = "0.27.0"
+
+[[example]]
+name = "cursor"
+path = "examples/cursor/cursor.rs" 
+
+
+[[example]]
+name = "keypress"
+path = "examples/keypress/keypress.rs" 
+
+[[example]]
+name = "list"
+path = "examples/list/list.rs" 
+
+[[example]]
+name = "mouse"
+path = "examples/mouse/mouse.rs" 
+
+[[example]]
+name = "resize"
+path = "examples/resize/resize.rs" 
+
+[[example]]
+name = "text_input"
+path = "examples/text_input/text_input.rs" 

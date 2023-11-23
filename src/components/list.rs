@@ -119,7 +119,6 @@ impl List {
         if let Some(index) = self.position {
             if index < self.items.len() - 1 {
                 self.position = Some(index + 1);
-                // TODO: Need to use Y position in self.bounds.get, not current index..
                 let y = self.viewport.y() as usize;
                 if let Some(bound) = self.bounds.get(&y) {
                     if bound.lower.is_some_and(|n| n == index) {
@@ -131,29 +130,5 @@ impl List {
             // Start from the top.
             self.position = Some(0);
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::font::MAROON;
-    use crate::model::Model;
-
-    use super::List;
-
-    #[test]
-    fn test_list() {
-        let mut list = List::new(
-            vec![
-                "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
-            ]
-            .into_iter()
-            .map(|n| n.to_string()),
-            5,
-            3,
-            MAROON,
-        );
-        list.viewport.down();
-        dbg!(list.view());
     }
 }

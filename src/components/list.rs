@@ -60,7 +60,7 @@ impl Model for List {
 
 impl List {
     /// Return a new instance of `Self`.
-    pub fn new<T>(items: T, height: u16, scroll_by: u16, foreground: u8) -> Self
+    pub fn new<T>(items: T, height: usize, scroll_by: usize, foreground: u8) -> Self
     where
         T: Iterator<Item = String>,
     {

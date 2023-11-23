@@ -25,18 +25,18 @@ pub type BoundMap = HashMap<usize, Bound>;
 /// Facilities for vertically paginating a view.
 pub struct Viewport {
     /// Viewport height.
-    height: u16,
+    height: usize,
     /// Amount of rows to scroll per action.
-    scroll_by: u16,
+    scroll_by: usize,
 
     /// Vertical scroll position.
     /// This is the distance (in lines) from the top of the viewport.
-    y: u16,
+    y: usize,
 }
 
 impl Viewport {
     /// Create a new instance of `Viewport`.
-    pub fn new(height: u16, scroll_by: u16) -> Self {
+    pub fn new(height: usize, scroll_by: usize) -> Self {
         Self {
             height,
             scroll_by,
@@ -79,51 +79,49 @@ impl Viewport {
     }
 
     /// Return the [`Viewport`] height.
-    pub fn height(&self) -> u16 {
+    pub fn height(&self) -> usize {
         self.height
     }
 
     /// Set the [`Viewport`] height.
-    pub fn set_height(&mut self, height: u16) {
+    pub fn set_height(&mut self, height: usize) {
         self.height = height;
     }
 
     /// Return the [`Viewport`] `y` position
-    pub fn y(&self) -> u16 {
+    pub fn y(&self) -> usize {
         self.y
     }
 
     /// Return a [`BoundMap`] for a set of items.
     pub fn bounds(&self, len: usize) -> BoundMap {
-        let mut result = BoundMap::new();
-        let mut y = 0;
+        let mut result: BoundMap = BoundMap::new();
 
-        loop {
-            let remaining = (0..len).skip(y).count();
+        let mut i: usize = 0;
+        while i < len {
+            let remaining = len - i;
 
             if remaining == 1 {
-                result.insert(y, Bound::new(y, None));
+                result.insert(i, Bound::new(i, None));
             } else if remaining > 1 {
-                let height = self.height as usize;
-
-                if remaining > height {
-                    result.insert(y, Bound::new(y, Some(y + height - 1)));
+                if remaining > self.height {
+                    result.insert(i, Bound::new(i, Some(i + self.height - 1)));
                 } else {
-                    result.insert(y, Bound::new(y, Some(y + remaining - 1)));
+                    result.insert(i, Bound::new(i, Some(i + remaining - 1)));
                     break;
                 }
             } else {
                 break;
             }
 
-            y += self.scroll_by as usize;
+            i += self.scroll_by;
         }
 
         result
     }
 
     /// Move the viewport up.
-    pub fn up(&mut self) -> u16 {
+    pub fn up(&mut self) -> usize {
         if self.y > 0 {
             self.y -= self.scroll_by;
         }
@@ -132,7 +130,7 @@ impl Viewport {
     }
 
     /// Move the viewport down.
-    pub fn down(&mut self) -> u16 {
+    pub fn down(&mut self) -> usize {
         if self.y < self.height {
             self.y += self.scroll_by;
         }

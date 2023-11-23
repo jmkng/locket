@@ -172,11 +172,7 @@ mod tests {
 
     #[test]
     fn test_bounds() {
-        // 11 lines.
-        let text = vec!["_", "_", "_", "_", "_", "_", "_", "_", "_", "_", "_"];
-        assert_eq!(text.len(), 11, "test cases expect 11 lines");
-
-        let one = Viewport::new(5, 3).bounds(text.len());
+        let one = Viewport::new(5, 3).bounds(11);
         // dbg!(one);
         assert_eq!(one.len(), 3);
         assert!(one
@@ -186,7 +182,7 @@ mod tests {
             .get(&6)
             .is_some_and(|n| n.upper == 6 && n.lower.is_some_and(|f| f == 10)));
 
-        let two = Viewport::new(4, 2).bounds(text.len());
+        let two = Viewport::new(4, 2).bounds(11);
         // dbg!(two);
         assert_eq!(two.len(), 5);
         assert!(two
@@ -196,7 +192,7 @@ mod tests {
             .get(&8)
             .is_some_and(|n| n.upper == 8 && n.lower.is_some_and(|f| f == 10)));
 
-        let three = Viewport::new(10, 10).bounds(text.len());
+        let three = Viewport::new(10, 10).bounds(11);
         // dbg!(three);
         assert_eq!(three.len(), 2);
         assert!(three

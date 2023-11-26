@@ -3,13 +3,17 @@ use locket::{Command, Message, Model};
 
 /// Display keyboard input as it is received.
 fn main() {
-    let model = KeypressModel { last_key: None };
-
-    locket::execute(model).unwrap();
+    locket::execute(KeypressModel::default()).unwrap();
 }
 
 struct KeypressModel {
     last_key: Option<char>,
+}
+
+impl Default for KeypressModel {
+    fn default() -> Self {
+        Self { last_key: None }
+    }
 }
 
 impl Model for KeypressModel {

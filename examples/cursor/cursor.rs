@@ -1,6 +1,6 @@
 use locket::{flush, move_down, move_right, move_up};
 
-/// Use Locket macros to manipulate the cursor and fix a typo.
+/// Manipulate the cursor to fix a typo.
 fn main() {
     println!("Line 1");
     println!("Line 3"); // <- Typo here!

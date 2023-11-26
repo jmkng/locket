@@ -3,15 +3,19 @@ use locket::{exit, Command, Message, Model};
 
 /// Display the cursor position as it moves within the terminal.
 fn main() {
-    let model = MouseModel { col: 0, row: 0 };
-
-    locket::with_mouse_capture!().unwrap();
-    locket::execute(model).unwrap();
+    locket::with_mouse_capture!().expect("must be able to capture mouse");
+    locket::execute(MouseModel::new(0, 0)).unwrap();
 }
 
 struct MouseModel {
-    col: u16,
-    row: u16,
+    col: usize,
+    row: usize,
+}
+
+impl MouseModel {
+    pub fn new(col: usize, row: usize) -> Self {
+        Self { col, row }
+    }
 }
 
 impl Model for MouseModel {
@@ -20,8 +24,8 @@ impl Model for MouseModel {
             if let MouseEventKind::Down(_) = mouse_event.kind {
                 return Some(Box::new(exit));
             }
-            self.col = mouse_event.column;
-            self.row = mouse_event.row;
+            self.col = mouse_event.column.into();
+            self.row = mouse_event.row.into();
         }
 
         None

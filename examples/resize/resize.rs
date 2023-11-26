@@ -3,19 +3,23 @@ use locket::{event::ResizeEvent, Command, Message, Model};
 
 /// Display the terminal dimensions as it is resized.
 fn main() {
-    let model = ResizeModel {
-        terminal_x: 0,
-        terminal_y: 0,
-        moved: false,
-    };
-
-    locket::execute(model).unwrap();
+    locket::execute(ResizeModel::default()).unwrap();
 }
 
 struct ResizeModel {
     terminal_x: u16,
     terminal_y: u16,
     moved: bool,
+}
+
+impl Default for ResizeModel {
+    fn default() -> Self {
+        Self {
+            terminal_x: 0,
+            terminal_y: 0,
+            moved: false,
+        }
+    }
 }
 
 impl Model for ResizeModel {

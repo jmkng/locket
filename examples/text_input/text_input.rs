@@ -3,13 +3,7 @@ use locket::{components::TextInput, Command, Message, Model};
 
 /// Display an input field to collect a name, and display a greeting.
 fn main() {
-    let model = InputModel {
-        prompt: "What is your name?".to_string(),
-        name: None,
-        input: TextInput::default(), // Equivalent to: TextInput::new(15, 29)
-    };
-
-    locket::execute(model).unwrap();
+    locket::execute(InputModel::new("What is your name?".to_string())).unwrap();
 }
 
 struct InputModel {
@@ -22,6 +16,16 @@ struct InputModel {
 
     // Nested `TextInput` component will handle the input field.
     input: TextInput,
+}
+
+impl InputModel {
+    pub fn new(prompt: String) -> Self {
+        Self {
+            prompt,
+            name: None,
+            input: TextInput::default(),
+        }
+    }
 }
 
 impl Model for InputModel {

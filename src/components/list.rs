@@ -245,7 +245,7 @@ impl List {
     /// assert_eq!(list.get_per(), 5);
     /// assert_eq!(list.get_page(), 0);
     ///
-    /// // Move two pages forward, and two items down.
+    /// // Move one page forward, and two items down.
     /// for _ in 0..list.get_per() {
     ///     list.handle_down();
     /// }

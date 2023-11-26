@@ -204,7 +204,6 @@ impl List {
             .get_num_on_page(self.items.len())
             .checked_sub(1)
             .unwrap_or(0)
-        // self.pager.get_num_on_page(self.items.len()) - 1
     }
 
     /// Set the position

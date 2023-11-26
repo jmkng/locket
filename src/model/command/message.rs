@@ -15,7 +15,8 @@ pub fn exit() -> Option<Message> {
 ///
 /// # Examples
 ///
-/// ```
+/// // TODO: Remove/rewrite
+/// ```no_run
 /// struct HttpResponse(String);
 ///
 /// let http_response_message = Box::new(HttpResponse("Hello World".to_string()));

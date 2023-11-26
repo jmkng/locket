@@ -1,61 +1,41 @@
-use locket::crossterm::event::{KeyCode, KeyEvent};
-use locket::font::FontBuilder;
+use crossterm::event::{KeyCode, KeyEvent};
 use locket::{components::List, font::MAROON, Command, Message, Model};
 
-/// Display an input field to collect a name, and display a greeting.
+/// Display a simple paginated list of items.
 fn main() {
-    let model = ListModel {
-        list: List::new(
-            vec![
-                "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
-            ]
-            .into_iter()
-            .map(|n| n.to_string()),
-            5,
-            1,
-            MAROON,
-        ),
-        choice: None,
-    };
-
-    locket::execute(model).unwrap();
+    locket::execute(ListModel::default()).unwrap();
 }
 
-struct ListModel {
-    choice: Option<String>,
-
-    // Nested `List` component will handle the list.
+pub struct ListModel {
     list: List,
+}
+
+impl Default for ListModel {
+    fn default() -> Self {
+        let mut items = Vec::new();
+        for i in 0..15 {
+            items.push(format!("{i}"))
+        }
+        assert_eq!(items.len(), 15);
+
+        Self {
+            list: List::new(items.into_iter(), 5, MAROON),
+        }
+    }
 }
 
 impl Model for ListModel {
     fn update(&mut self, message: &Message) -> Option<Command> {
         if let Some(event) = message.downcast_ref::<KeyEvent>() {
             locket::with_exit!(event);
-
-            match event.code {
-                // Update the selected item.
-                KeyCode::Enter => {
-                    self.choice = self.list.selected();
-                }
-
-                _ => {}
-            }
         };
-        self.list.update(message);
 
-        None
+        let command = self.list.update(message);
+
+        command
     }
 
     fn view(&self) -> String {
-        format!(
-            "{}\n\n{}\n\n{}",
-            "Select one:",
-            self.list.view(),
-            self.choice.as_ref().map_or(String::new(), |n| format!(
-                "You selected: {}",
-                FontBuilder::new(n).underline().bold().to_string()
-            ))
-        )
+        self.list.view()
     }
 }

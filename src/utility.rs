@@ -1,6 +1,6 @@
-pub use viewport::{BoundMap, Viewport};
+pub use pager::Pager;
 
-mod viewport;
+mod pager;
 
 /// Normalize "\n" line endings to "\r\n".
 ///

@@ -1,7 +1,7 @@
 pub use crossterm;
 pub use model::{batch, exit};
 pub use model::{Command, Message, Model};
-pub use utility::Viewport;
+pub use utility::Pager;
 
 pub mod components;
 pub mod event;

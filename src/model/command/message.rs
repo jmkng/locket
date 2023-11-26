@@ -12,19 +12,6 @@ pub fn exit() -> Option<Message> {
 ///
 /// You may use `downcast_ref` to determine the type of the message,
 /// and extract any required information.
-///
-/// # Examples
-///
-/// // TODO: Remove/rewrite
-/// ```no_run
-/// struct HttpResponse(String);
-///
-/// let http_response_message = Box::new(HttpResponse("Hello World".to_string()));
-///
-/// if let Some(res) = http_response_message.downcast_ref::<HttpResponse>() {
-///     model.response = Some(res);
-/// }
-/// ```
 pub type Message = Box<dyn std::any::Any + Send>;
 
 /// A wrapper for `Vec<Command>`, representing a series of commands.

@@ -21,7 +21,7 @@ pub struct List {
     items: Vec<String>,
 
     /// Nested `Pager` helps with pagination.
-    pub pager: Pager,
+    pager: Pager,
 }
 
 impl List {
@@ -63,7 +63,7 @@ impl List {
     /// # Examples
     ///
     /// ```
-    /// use locket::components::List2;
+    /// use locket::components::List;
     ///
     /// // Start with `15` items.
     /// let mut items = Vec::new();
@@ -72,7 +72,7 @@ impl List {
     /// }
     /// assert_eq!(items.len(), 15);
     ///
-    /// let mut list = List2::new(items.into_iter(), 5, 10);
+    /// let mut list = List::new(items.into_iter(), 5, 10);
     ///
     /// // Move to the middle of the page.
     /// list.set_position(3);
@@ -85,13 +85,13 @@ impl List {
     /// }
     ///
     /// assert_eq!(list.get_position(), 0);
-    /// assert_eq!(list.pager.get_page(), 0);
+    /// assert_eq!(list.get_page(), 0);
     ///
     /// // The component will not wrap around if we are on the first page.
     /// list.handle_up();
     ///
     /// assert_eq!(list.get_position(), 0);
-    /// assert_eq!(list.pager.get_page(), 0);
+    /// assert_eq!(list.get_page(), 0);
     /// ```
     pub fn handle_up(&mut self) {
         if self.is_on_first_item() {
@@ -110,7 +110,7 @@ impl List {
     /// # Examples
     ///
     /// ```
-    /// use locket::components::List2;
+    /// use locket::components::List;
     ///
     /// // Start with `15` items.
     /// let mut items = Vec::new();
@@ -119,7 +119,7 @@ impl List {
     /// }
     /// assert_eq!(items.len(), 15);
     ///
-    /// let mut list = List2::new(items.into_iter(), 5, 10);
+    /// let mut list = List::new(items.into_iter(), 5, 10);
     ///
     /// assert_eq!(list.get_position(), 0);
     ///
@@ -129,13 +129,13 @@ impl List {
     /// }
     ///
     /// assert_eq!(list.get_position(), 4);
-    /// assert_eq!(list.pager.get_page(), 0);
+    /// assert_eq!(list.get_page(), 0);
     ///
     /// // The list will move to the next page, if one exists.
     /// list.handle_down();
     ///
     /// assert_eq!(list.get_position(), 0);
-    /// assert_eq!(list.pager.get_page(), 1);
+    /// assert_eq!(list.get_page(), 1);
     /// ```
     pub fn handle_down(&mut self) {
         if self.is_on_last_item() {
@@ -145,6 +145,21 @@ impl List {
             // Just move the cursor down.
             self.position += 1;
         }
+    }
+
+    /// Return the current page number.
+    pub fn get_page(&self) -> usize {
+        self.pager.get_page()
+    }
+
+    /// Return the total amount of pages.
+    pub fn get_total(&self) -> usize {
+        self.pager.get_total()
+    }
+
+    /// Return the number of items displayed per page.
+    pub fn get_per(&self) -> usize {
+        self.pager.get_per()
     }
 
     /// Move to the next page and adjust cursor position.
@@ -213,7 +228,7 @@ impl List {
     /// # Examples
     ///
     /// ```
-    /// use locket::components::List2;
+    /// use locket::components::List;
     ///
     /// // We have `14` total items.
     /// let mut items = Vec::new();
@@ -222,18 +237,25 @@ impl List {
     /// }
     /// assert_eq!(items.len(), 14);
     ///
-    /// let mut list = List2::new(items.into_iter(), 5);
+    /// let mut list = List::new(items.into_iter(), 5, 10);
     ///
     /// // We start on the first item.
     /// assert_eq!(list.get_overall_position(), 0);
     ///
-    /// // `self.position` should be the position on the current page,
-    /// // so move two pages forward and two items down.
-    /// list.pager.next();
-    /// list.pager.next();
-    /// list.set_position(3);
+    /// assert_eq!(list.get_per(), 5);
+    /// assert_eq!(list.get_page(), 0);
     ///
-    /// assert_eq!(list.get_overall_position(), 13);
+    /// // Move two pages forward, and two items down.
+    /// for _ in 0..list.get_per() {
+    ///     list.handle_down();
+    /// }
+    ///
+    /// assert_eq!(list.get_page(), 1);
+    ///
+    /// list.handle_down();
+    /// list.handle_down();
+    ///
+    /// assert_eq!(list.get_overall_position(), 7);
     /// ```
     pub fn get_overall_position(&self) -> usize {
         self.pager.get_page() * self.pager.get_per() + self.position

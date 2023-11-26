@@ -301,7 +301,6 @@ impl Model for List {
 
         // Based on the pager state, what items should be visible?
         let (start, end) = self.pager.get_bounds(self.items.len());
-        // 30:15? TODO
 
         let selected = self
             .items

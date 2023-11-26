@@ -13,7 +13,6 @@ crossterm = "0.27.0"
 name = "cursor"
 path = "examples/cursor/cursor.rs" 
 
-
 [[example]]
 name = "keypress"
 path = "examples/keypress/keypress.rs" 
